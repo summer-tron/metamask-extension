@@ -423,6 +423,7 @@ import OAuthService from './services/oauth/oauth-service';
 import { webAuthenticatorFactory } from './services/oauth/web-authenticator-factory';
 import { SeedlessOnboardingControllerInit } from './controller-init/seedless-onboarding/seedless-onboarding-controller-init';
 import { applyTransactionContainersExisting } from './lib/transaction/containers/util';
+import { WatchOnlyKeyring } from './watchOnlyKeyring';
 
 export const METAMASK_CONTROLLER_EVENTS = {
   // Fired after state changes that impact the extension badge (unapproved msg count)
@@ -1143,7 +1144,10 @@ export default class MetamaskController extends EventEmitter {
       webAuthenticator: webAuthenticatorFactory(),
     });
 
-    let additionalKeyrings = [keyringBuilderFactory(QRHardwareKeyring)];
+    let additionalKeyrings = [
+      keyringBuilderFactory(QRHardwareKeyring),
+      keyringBuilderFactory(WatchOnlyKeyring),
+    ];
 
     const keyringOverrides = this.opts.overrides?.keyrings;
 
@@ -1151,6 +1155,7 @@ export default class MetamaskController extends EventEmitter {
       const additionalKeyringTypes = [
         keyringOverrides?.lattice || LatticeKeyring,
         QRHardwareKeyring,
+        WatchOnlyKeyring,
       ];
 
       const additionalBridgedKeyringTypes = [
@@ -3511,6 +3516,7 @@ export default class MetamaskController extends EventEmitter {
 
       // primary keyring management
       addNewAccount: this.addNewAccount.bind(this),
+      addWatchOnlyAccount: this.addWatchOnlyAccount.bind(this),
       getSeedPhrase: this.getSeedPhrase.bind(this),
       resetAccount: this.resetAccount.bind(this),
       removeAccount: this.removeAccount.bind(this),
@@ -5748,6 +5754,8 @@ export default class MetamaskController extends EventEmitter {
         return 'hardware';
       case KeyringType.imported:
         return 'imported';
+      // case KeyringType.watchOnly:
+      //   return 'watchOnly';
       case KeyringType.snap:
         return 'snap';
       default:
@@ -5906,6 +5914,49 @@ export default class MetamaskController extends EventEmitter {
     }
 
     return addedAccountAddress;
+  }
+
+  async addWatchOnlyAccount(_keyringId, label, address) {
+    try {
+      // ✅ 确保 WatchOnlyKeyring 已添加
+      let keyrings =
+        await this.keyringController.getKeyringsByType('Watch Only');
+
+      if (keyrings.length === 0) {
+        await this.keyringController.addNewKeyring('Watch Only');
+      }
+
+      const newAccountId = await this.keyringController.withKeyring(
+        { type: 'Watch Only' }, // 注册 WatchOnlyKeyring 时设置的 type
+        async ({ keyring }) => {
+          const existingAccounts = await keyring.listAccounts();
+
+          const exists = existingAccounts.some(
+            (acc) => acc.address.toLowerCase() === address.toLowerCase(),
+          );
+
+          if (exists) {
+            throw new Error(`Watch-only account ${address} already exists`);
+          }
+
+          const newAccount = await keyring.createAccount({ label, address });
+
+          return newAccount.id;
+        },
+      );
+
+      console.log(
+        'summer --- metamask-controller --- addWatchOnlyAccount',
+        newAccountId,
+      );
+
+      this.preferencesController.setSelectedAddress(newAccountId);
+      // this.accountsController.setSelectedAccount(newAccountId);
+      return newAccountId;
+    } catch (err) {
+      console.error('Error in addWatchOnlyAccount', err);
+      throw err;
+    }
   }
 
   /**

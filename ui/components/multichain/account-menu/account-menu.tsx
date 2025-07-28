@@ -83,6 +83,7 @@ import {
 ///: END:ONLY_INCLUDE_IF
 import { endTrace, TraceName } from '../../../../shared/lib/trace';
 import { CreateEthAccount } from '../create-eth-account';
+import { CreateWatchOnlyAccount } from '../create-watch-only-account';
 ///: BEGIN:ONLY_INCLUDE_IF(multichain)
 import { CreateSnapAccount } from '../create-snap-account';
 import { CreateAccountSnapOptions } from '../../../../shared/lib/accounts';
@@ -119,6 +120,7 @@ export const ACTION_MODES = {
   CREATE_SRP: 'create-srp',
   IMPORT_SRP: 'import-srp',
   SELECT_SRP: 'select-srp',
+  WATCH_ONLY_ACCOUNT: 'watch-only-account',
 } as const;
 
 export type ActionMode = (typeof ACTION_MODES)[keyof typeof ACTION_MODES];
@@ -174,6 +176,8 @@ export const getActionTitle = (
       return t('importSecretRecoveryPhrase');
     case ACTION_MODES.SELECT_SRP:
       return t('selectSecretRecoveryPhrase');
+    case ACTION_MODES.WATCH_ONLY_ACCOUNT:
+      return 'Watch Only Account';
     default:
       return t('selectAnAccount');
   }
@@ -365,6 +369,15 @@ export const AccountMenu = ({
             />
           </Box>
         ) : null}
+
+        {actionMode === ACTION_MODES.WATCH_ONLY_ACCOUNT ? (
+          <Box paddingLeft={4} paddingRight={4} paddingBottom={4}>
+            <CreateWatchOnlyAccount
+              onActionComplete={onActionComplete}
+              selectedKeyringId={selectedKeyringId}
+            />
+          </Box>
+        ) : null}
         {
           ///: BEGIN:ONLY_INCLUDE_IF(multichain)
           clientType && chainId ? (
@@ -548,6 +561,20 @@ export const AccountMenu = ({
                 {t('importPrivateKey')}
               </ButtonLink>
             </Box>
+
+            <Box marginTop={4}>
+              <ButtonLink
+                size={ButtonLinkSize.Sm}
+                startIconName={IconName.Add}
+                startIconProps={{ size: IconSize.Md }}
+                onClick={async () => {
+                  setActionMode(ACTION_MODES.WATCH_ONLY_ACCOUNT);
+                }}
+              >
+                Watch Only Account
+              </ButtonLink>
+            </Box>
+
             <Text
               variant={TextVariant.bodySmMedium}
               marginTop={4}
