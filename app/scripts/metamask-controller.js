@@ -5916,10 +5916,10 @@ export default class MetamaskController extends EventEmitter {
     return addedAccountAddress;
   }
 
-  async addWatchOnlyAccount(_keyringId, label, address) {
+  async addWatchOnlyAccount(label, address) {
     try {
       // ✅ 确保 WatchOnlyKeyring 已添加
-      let keyrings =
+      const keyrings =
         await this.keyringController.getKeyringsByType('Watch Only');
 
       if (keyrings.length === 0) {
@@ -5940,7 +5940,6 @@ export default class MetamaskController extends EventEmitter {
           }
 
           const newAccount = await keyring.createAccount({ label, address });
-
           return newAccount.id;
         },
       );

@@ -42,14 +42,14 @@ export class WatchOnlyKeyring implements Keyring {
         'Address is required for watch-only accounts, and need string',
       );
     }
-
-    const address = options.address;
+    // 需要toLowerCase一下，不然删除的时候会找不到
+    const address = options.address.toLowerCase();
     const account: KeyringAccount = {
       id: address,
       address,
-      scopes: ['eip155:1', 'eip155:137', 'eip155:10', 'eip155:42161'],
+      scopes: ['eip155:0'],
       options: { label: options.label || 'Watch Only Account' },
-      methods: [], // 不支持签名方法
+      methods: [], // 不支持签名方法，但会被AccountsController修改成默认的签名方法，目测无影响
       type: 'eip155:eoa',
     };
 
@@ -58,6 +58,18 @@ export class WatchOnlyKeyring implements Keyring {
   }
 
   async deleteAccount(id: string): Promise<void> {
+    if (!this.accounts.has(id)) {
+      throw new Error(`Account ${id} not found`);
+    }
+    this.accounts.delete(id);
+  }
+
+  /**
+   *
+   * @param id
+   */
+  async removeAccount(id: string): Promise<void> {
+    console.log('summer removeAccount', id);
     if (!this.accounts.has(id)) {
       throw new Error(`Account ${id} not found`);
     }

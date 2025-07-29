@@ -816,6 +816,7 @@ export function removeAccount(
     try {
       await new Promise((resolve, reject) => {
         callBackgroundMethod('removeAccount', [address], (error, account) => {
+          console.log('summer removeAccount', error, account);
           if (error) {
             reject(error);
             return;
@@ -913,46 +914,28 @@ export function addNewAccount(
 export function addNewWatchOnlyAccount(
   label,
   accountAddress,
-  keyringId?: string,
 ): ThunkAction<void, MetaMaskReduxState, unknown, AnyAction> {
   return async (dispatch, getState) => {
-    const keyrings = getMetaMaskHdKeyrings(getState());
-    const [defaultPrimaryKeyring] = keyrings;
-    console.log('keyrings----', keyrings, keyringId);
-
-    // The HD keyring to add the account for.
-    let hdKeyring = defaultPrimaryKeyring;
-    if (keyringId) {
-      hdKeyring = keyrings.find((keyring) => keyring.metadata.id === keyringId);
-    }
-    // Fail-safe in case we could not find the associated HD keyring.
-    if (!hdKeyring) {
-      console.error('Should never reach this. There is always a keyring');
-      throw new Error('Keyring not found');
-    }
-    // const oldAccounts = hdKeyring.accounts;
-    // console.log('oldAccounts----', oldAccounts);
-
     dispatch(showLoadingIndication());
-
     let newAccount;
     try {
       const addedAccountAddress = await submitRequestToBackground(
         'addWatchOnlyAccount',
-        [keyringId, label, accountAddress],
+        [label, accountAddress],
       );
-      console.log('summer --- action', addedAccountAddress);
-      // newAccount = addedAccountAddress;
+      console.log('summer ---  submitRequestToBackground', addedAccountAddress);
+
       await forceUpdateMetamaskState(dispatch);
       const newState = getState();
       newAccount = getInternalAccountByAddress(newState, addedAccountAddress);
+      console.log('summer --- action', addedAccountAddress, newAccount);
+      console.log('summer newState', newState);
     } catch (error) {
       dispatch(displayWarning(error));
       throw error;
     } finally {
       dispatch(hideLoadingIndication());
     }
-
     return newAccount;
   };
 }

@@ -7,7 +7,7 @@
     "url": "https://github.com/MetaMask/metamask-extension.git"
   },
   "scripts": {
-    "webpack": "tsx ./development/webpack/launch.ts",
+    "webpack": "tsx ./development/webpack/launch.ts --apply-lavamoat=false",
     "webpack:clearcache": "./development/clear-webpack-cache.js",
     "foundryup": "npx mm-foundryup",
     "postinstall": "yarn webpack:clearcache && yarn foundryup",

@@ -17,18 +17,16 @@ import { getAccountNameErrorMessage } from '../../../helpers/utils/accounts';
 import { getMetaMaskAccountsOrdered } from '../../../selectors';
 import { getMostRecentOverviewPage } from '../../../ducks/history/history';
 import {
-  setAccountLabel,
   addNewWatchOnlyAccount,
   getNextAvailableAccountName as getNextAvailableAccountNameFromController,
+  setAccountLabel,
 } from '../../../store/actions';
 import { getAccountAddressErrorMessage } from './getAccountAddressErrorMessage';
 
 export const CreateWatchOnlyAccount = ({
   onActionComplete,
-  selectedKeyringId,
 }: {
   onActionComplete: (argg0: boolean) => void;
-  selectedKeyringId?: string;
 }) => {
   const dispatch = useDispatch();
   const t = useI18nContext();
@@ -37,7 +35,7 @@ export const CreateWatchOnlyAccount = ({
   const mostRecentOverviewPage = useSelector(getMostRecentOverviewPage);
 
   const accounts: InternalAccount[] = useSelector(getMetaMaskAccountsOrdered);
-  console.log('accounts----:', accounts);
+  console.log('summer --- accounts', accounts);
 
   const [loading, setLoading] = useState(false);
   const [defaultAccountName, setDefaultAccountName] = useState('');
@@ -45,6 +43,8 @@ export const CreateWatchOnlyAccount = ({
 
   const [newAccountName, setNewAccountName] = useState('');
   const [newAddress, setNewAddress] = useState('');
+  const [isValidAccountAddress, setIsValidAccountAddress] = useState(true);
+  const [addressErrorMsg, setAddressErrorMsg] = useState('');
 
   const trimmedAccountName = newAccountName.trim();
   const trimmedAccountAddress = newAddress.trim();
@@ -57,11 +57,6 @@ export const CreateWatchOnlyAccount = ({
       defaultAccountName,
     );
 
-  const { isValidAccountAddress, errorMessage: addressErrorMsg } =
-    getAccountAddressErrorMessage(accounts, trimmedAccountAddress);
-
-  // We are not using `accounts` as a dependency here to avoid having the input
-  // updating when the new account will be created.
   useEffect(() => {
     const getNextAvailableAccountName = async () => {
       return await getNextAvailableAccountNameFromController(
@@ -70,6 +65,18 @@ export const CreateWatchOnlyAccount = ({
     };
     getNextAvailableAccountName().then(setDefaultAccountName);
   }, []);
+
+  useEffect(() => {
+    if (trimmedAccountAddress === '') {
+      return;
+    }
+    const { errorMessage } = getAccountAddressErrorMessage(
+      accounts,
+      trimmedAccountAddress,
+    );
+    setIsValidAccountAddress(!errorMessage);
+    setAddressErrorMsg(errorMessage);
+  }, [accounts, trimmedAccountAddress]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -81,16 +88,17 @@ export const CreateWatchOnlyAccount = ({
         addNewWatchOnlyAccount(
           trimmedAccountName || defaultAccountName,
           newAddress,
-          selectedKeyringId,
         ),
       );
-
       console.log('summer --- create-watch-only-account', newAccount);
-      // if (newAddress) {
-      //   dispatch(
-      //     setAccountLabel(newAddress, trimmedAccountName || defaultAccountName),
-      //   );
-      // }
+      if (newAddress) {
+        dispatch(
+          setAccountLabel(
+            (newAccount as any).address,
+            trimmedAccountName || defaultAccountName,
+          ),
+        );
+      }
       setLoading(false);
       onActionComplete(true);
       history.push(mostRecentOverviewPage);

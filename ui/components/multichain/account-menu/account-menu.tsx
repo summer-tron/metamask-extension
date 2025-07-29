@@ -372,10 +372,7 @@ export const AccountMenu = ({
 
         {actionMode === ACTION_MODES.WATCH_ONLY_ACCOUNT ? (
           <Box paddingLeft={4} paddingRight={4} paddingBottom={4}>
-            <CreateWatchOnlyAccount
-              onActionComplete={onActionComplete}
-              selectedKeyringId={selectedKeyringId}
-            />
+            <CreateWatchOnlyAccount onActionComplete={onActionComplete} />
           </Box>
         ) : null}
         {

@@ -5,7 +5,7 @@ export function getAccountAddressErrorMessage(
   accounts: InternalAccount[],
   newAccountAddress: string,
 ) {
-  let errorMessage;
+  let errorMessage = '';
   if (
     !isValidHexAddress(newAccountAddress, {
       allowNonPrefixed: false,
@@ -22,5 +22,5 @@ export function getAccountAddressErrorMessage(
     errorMessage = 'Address Duplicate';
   }
 
-  return { isValidAccountAddress: !errorMessage, errorMessage };
+  return { errorMessage };
 }
