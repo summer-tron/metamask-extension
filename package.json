@@ -22,6 +22,7 @@
     "dist": "yarn build dist",
     "dist:mv2": "ENABLE_MV3=false yarn build dist",
     "build": "yarn lavamoat:build",
+    "build:mock": "yarn build:dev dist --apply-lavamoat=false",
     "build:dev": "node development/build/index.js",
     "circular-deps:check": "tsx development/circular-deps.ts check",
     "circular-deps:update": "tsx development/circular-deps.ts update",
