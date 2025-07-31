@@ -816,6 +816,7 @@ export function removeAccount(
     try {
       await new Promise((resolve, reject) => {
         callBackgroundMethod('removeAccount', [address], (error, account) => {
+          console.log('summer removeAccount', error, account);
           if (error) {
             reject(error);
             return;
@@ -906,6 +907,35 @@ export function addNewAccount(
       dispatch(hideLoadingIndication());
     }
 
+    return newAccount;
+  };
+}
+
+export function addNewWatchOnlyAccount(
+  label,
+  accountAddress,
+): ThunkAction<void, MetaMaskReduxState, unknown, AnyAction> {
+  return async (dispatch, getState) => {
+    dispatch(showLoadingIndication());
+    let newAccount;
+    try {
+      const addedAccountAddress = await submitRequestToBackground(
+        'addWatchOnlyAccount',
+        [label, accountAddress],
+      );
+      console.log('summer ---  submitRequestToBackground', addedAccountAddress);
+
+      await forceUpdateMetamaskState(dispatch);
+      const newState = getState();
+      newAccount = getInternalAccountByAddress(newState, addedAccountAddress);
+      console.log('summer --- action', addedAccountAddress, newAccount);
+      console.log('summer newState', newState);
+    } catch (error) {
+      dispatch(displayWarning(error));
+      throw error;
+    } finally {
+      dispatch(hideLoadingIndication());
+    }
     return newAccount;
   };
 }

@@ -14,6 +14,10 @@ export enum InternalKeyringType {
   imported = 'Simple Key Pair',
 }
 
+// export enum WatchOnlyKeyringType {
+//   watchOnly = 'Watch Only Keyring',
+// }
+
 ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
 export enum SnapKeyringType {
   // TODO: Fix in https://github.com/MetaMask/metamask-extension/issues/31860
@@ -28,6 +32,7 @@ export enum SnapKeyringType {
 export const KeyringType = {
   ...HardwareKeyringType,
   ...InternalKeyringType,
+  // ...WatchOnlyKeyringType,
   ///: BEGIN:ONLY_INCLUDE_IF(keyring-snaps)
   ...SnapKeyringType,
   ///: END:ONLY_INCLUDE_IF

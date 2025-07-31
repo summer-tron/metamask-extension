@@ -7,7 +7,7 @@
     "url": "https://github.com/MetaMask/metamask-extension.git"
   },
   "scripts": {
-    "webpack": "tsx ./development/webpack/launch.ts",
+    "webpack": "tsx ./development/webpack/launch.ts --apply-lavamoat=false",
     "webpack:clearcache": "./development/clear-webpack-cache.js",
     "foundryup": "npx mm-foundryup",
     "postinstall": "yarn webpack:clearcache && yarn foundryup",
@@ -22,6 +22,7 @@
     "dist": "yarn build dist",
     "dist:mv2": "ENABLE_MV3=false yarn build dist",
     "build": "yarn lavamoat:build",
+    "build:mock": "yarn build:dev dist --apply-lavamoat=false",
     "build:dev": "node development/build/index.js",
     "circular-deps:check": "tsx development/circular-deps.ts check",
     "circular-deps:update": "tsx development/circular-deps.ts update",
@@ -259,7 +260,7 @@
     "@metamask/abi-utils": "^2.0.2",
     "@metamask/account-tree-controller": "^0.1.0",
     "@metamask/account-watcher": "^4.1.3",
-    "@metamask/accounts-controller": "^30.0.0",
+    "@metamask/accounts-controller": "^32.0.1",
     "@metamask/address-book-controller": "^6.1.0",
     "@metamask/announcement-controller": "^7.0.3",
     "@metamask/approval-controller": "^7.0.0",
